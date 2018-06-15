@@ -44,7 +44,7 @@ class text{
     int num;
     text(String text){this.text = text;}
     void num(int num){this.num = num;}
-    int getNum(String text){return num;};
+    int getNum(String text){return num;}
 }
 
 public class xml_homework_2 {
@@ -152,6 +152,7 @@ public class xml_homework_2 {
 	    try{
 	        String out[][] = new String[10000][3];
 	        String tempTxt[] = new String[100];
+	        String cnt[] = new String[150];
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document document = db.parse(".//out.xml");
             Element root = document.getDocumentElement();
@@ -160,7 +161,24 @@ public class xml_homework_2 {
             int offset=0;
             int flag;
             int flagtemp;
-            int cnt= 0;
+            //int cnt= 0;
+            int row=1;
+            WritableWorkbook node = Workbook.createWorkbook(new File("node.xls"));
+            WritableSheet sheet1 = node.createSheet("sheet1",0);
+            Label idLabel = new Label(0,0,"id");
+            sheet1.addCell(idLabel);
+            Label nameLabel = new Label(1,0,"name");
+            sheet1.addCell(nameLabel);
+            for(iCnt = 0; iCnt < pageList.getLength(); iCnt++) {
+                Number id = new Number(0,row,row);
+                String pagetile = pageList.item(iCnt).getAttributes().item(0).getNodeValue();
+                sheet1.addCell(id);
+                Label name = new Label(1,row,pagetile);
+                sheet1.addCell(name);
+//                System.out.println("(a"+row+":pagetitle {name:\""+pagetile+"\"}),");
+                cnt[row-1]=pagetile;
+                row++;
+            }
             for(iCnt = 0; iCnt < pageList.getLength(); iCnt++) {
                 int offsettemp=0;
                 flagtemp=offset;
@@ -172,10 +190,27 @@ public class xml_homework_2 {
                     String temp = textList.item(jCnt).getAttributes().item(0).toString();
                     int count = Integer.valueOf(temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")));
                     if (count > 2) {
-                        cnt ++;
+                        //cnt ++;
                         //System.out.println(temp.substring(temp.indexOf("\"")+1,temp.lastIndexOf("\"")));
                         //System.out.println(textList.item(jCnt).getFirstChild().getNodeValue());
                         String txtTemp = textList.item(jCnt).getFirstChild().getNodeValue();
+                        boolean tag=false;
+                        for(int kCnt=0;kCnt<row;kCnt++){
+                            if(txtTemp.equals(cnt[kCnt])){
+                                tag =true;
+                                break;
+                            }
+                            tag=false;
+                        }
+                        if(tag==false){
+                            Number idnew = new Number(0,row,row);
+                            sheet1.addCell(idnew);
+                            Label namenew = new Label(1,row,txtTemp);
+                            sheet1.addCell(namenew);
+                            cnt[row-1]=txtTemp;
+//                            System.out.println("(a"+row+":text {name:\""+txtTemp+"\"}),");
+                            row++;
+                        }
                         flag = flagtemp;
                         if (pagetile.length() < txtTemp.length()) {
                             while (flag != 0) {
@@ -204,6 +239,7 @@ public class xml_homework_2 {
                                 out[offset][1] = pagetile;
                                 out[offset++][2] = count + "";
                                 tempTxt[offsettemp] = txtTemp;
+
                             }
                         }
                         offsettemp++;
@@ -258,10 +294,32 @@ public class xml_homework_2 {
                 sheet.addCell(name2nd);
                 Number res = new Number(2,iCnt+1,Integer.valueOf(out[iCnt][2]));
                 sheet.addCell(res);
+//                int point1=0;
+//                int point2=0;
+//                int temp=0;
+//                for(int jCnt=0;jCnt<row-1;jCnt++){
+//                    if(cnt[jCnt].equals(out[iCnt][0])){
+//                        point1 = jCnt;
+//                        temp++;
+//                        if(temp==2)
+//                            break;
+//                    }
+//                    else if (cnt[jCnt].equals(out[iCnt][1])){
+//                        point2 = jCnt;
+//                        temp++;
+//                        if(temp==2)
+//                            break;
+//                    }
+//                }
+//                System.out.println("(a"+(point1+1)+")-[:Label{label:"+Integer.valueOf(out[iCnt][2])+"}]->(a"+(point2+1)+"),");
             }
+            node.write();
+            node.close();
             book.write();
             book.close();
-            System.out.println(cnt);
+//            System.out.print("return ");
+//            for(int jCnt=0;jCnt<row-1;jCnt++)
+//                System.out.print("a"+(jCnt+1)+",");
         }
         catch (Exception e){
             System.out.println(e);
